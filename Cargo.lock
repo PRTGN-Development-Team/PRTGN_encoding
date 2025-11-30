@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "PRTGN_encoding"
+name = "prtgn_encoding"
 version = "0.1.0"

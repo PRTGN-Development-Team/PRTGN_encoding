@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::prelude::*;
+
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
@@ -13,31 +16,88 @@ mod tests {
         println!("Hello, world!");
         println!("Test : {result}");
 
-        supported_unicode_char()
+
+//       let la = la();
+
+//        supported_unicode_char()
 
     }
 }
 
+// https://stackoverflow.com/a/53827079
 
-fn supported_unicode_char() {
-    //let v = Vec::from_iter('\u{0000}'..='\u{10FFFF}');
-    // println!("Unicode : {:?}", v);
-    // println!("Unicode Char : {}", String::from_iter(v));
+pub mod write {
+    use super::*;
 
-//! **Supported Unicode Blocks : https://en.wikipedia.org/wiki/Unicode_block#List_of_blocks**
+    fn write(filename: String, text: String) -> std::io::Result<()> {
+        {
+            let mut file = File::create(filename)?;
+            // Write a slice of bytes to the file
 
-    let basic_latin = Vec::from_iter('\u{0000}'..='\u{007F}');
+            let bytes = text.into_bytes();
 
-    let latin_one_supplement = Vec::from_iter('\u{0080}'..='\u{00FF}');
+            file.write_all(&bytes)?;
+        }
 
-    let latin_extended_a = Vec::from_iter('\u{0100}'..='\u{017F}');
 
-    let latin_extended_b = Vec::from_iter('\u{0180}'..='\u{024F}');
+        Ok(())
+    }
+}
 
-    let ipa_extensions = Vec::from_iter('\u{0250}'..='\u{02AF}');
+pub mod read {
+    use super::*;
 
+    fn read(filename: String) -> std::io::Result<()> {
+        {
+            let mut file = File::open(filename)?;
+            // read the same file back into a Vec of bytes
+            let mut buffer = Vec::<u8>::new();
+            file.read_to_end(&mut buffer)?;
+            println!("{:?}", buffer);
+        }
+
+        Ok(())
+    }
 
 }
+
+
+
+// fn supported_unicode_char() {
+//     //let v = Vec::from_iter('\u{0000}'..='\u{10FFFF}');
+//     // println!("Unicode : {:?}", v);
+//     // println!("Unicode Char : {}", String::from_iter(v));
+//
+// //! **Supported Unicode Blocks : https://en.wikipedia.org/wiki/Unicode_block#List_of_blocks**
+//
+//     let basic_latin = Vec::from_iter('\u{0000}'..='\u{007F}');
+//
+//     let latin_one_supplement = Vec::from_iter('\u{0080}'..='\u{00FF}');
+//
+//     let latin_extended_a = Vec::from_iter('\u{0100}'..='\u{017F}');
+//
+//     let latin_extended_b = Vec::from_iter('\u{0180}'..='\u{024F}');
+//
+//     let ipa_extensions = Vec::from_iter('\u{0250}'..='\u{02AF}');
+//
+//     let spacing_modifier_letters = Vec::from_iter('\u{02B0}'..='\u{02FF}');
+//
+//     let combining_diacritical_marks = Vec::from_iter('\u{03000}'..='\u{036F}');
+//
+//     let general_punctuation = Vec::from_iter('\u{2000}'..='\u{206F}');
+//
+//     let super_sub_script = Vec::from_iter('\u{2070}'..='\u{209F}');
+//
+//     let currency_symbols = Vec::from_iter('\u{200A0}'..='\u{20CF}');
+//
+//     let letterlike_symbols = Vec::from_iter('\u{2100}'..='\u{214F}');
+//
+//     let maths_operators = Vec::from_iter('\u{2200}'..='\u{22FF}');
+//
+//     let box_draw = Vec::from_iter('\u{2500}'..='\u{257F}');
+//
+//
+// }
 
 
 // use std::fs;
