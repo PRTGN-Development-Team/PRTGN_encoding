@@ -21,3 +21,38 @@ A Rust library for encoding PRTGN files.
 >You should have received a copy of the GNU General Public License
 >along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+## Basic Usage
+
+### Implementing
+
+Add line to cargo.toml :
+```toml
+prtgn_encoding = { git = "https://github.com/PRTGN-Development-Team/PRTGN_encoding" }
+```
+
+### Write
+
+```rust
+use prtgn_encoding::write;
+
+fn main() {
+    
+    let filename = "test.prtgn".to_string();
+    let text = "Hello world! This is some example text.".to_string();
+    
+    write(filename, text).unwrap();
+}
+```
+
+### Read
+
+```rust
+use prtgn_encoding::read;
+
+fn main() {
+    
+    let filename = "test.prtgn".to_string();
+
+    let read_text = read(filename).unwrap().to_string();
+}
+```

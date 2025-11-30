@@ -1,9 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
-
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use std::io::Result;
 
 #[cfg(test)]
 mod tests {
@@ -11,32 +8,50 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-        println!("Hello, world!");
-        println!("Test : {result}");
+        println!("Hello from the PRTGN Development Team");
 
+        let text = "Hello from PRTGN Encoding!".to_string();
+        let og_txt = text.clone();
+        write("test.prtgn".to_string(), text).unwrap();
 
-//       let la = la();
+        let dcoded = read("test.prtgn".to_string()).unwrap().to_string();
 
-//        supported_unicode_char()
+        println!("Original : {:?}", og_txt);
 
+        println!("Decoded : {:?}", dcoded);
+        assert_eq!(dcoded, og_txt);
+
+        println!("Test passed!");
+
+        std::fs::remove_file("test.prtgn").unwrap();
     }
 }
 
-// https://stackoverflow.com/a/53827079
+
+pub use read::read;
+pub use write::write;
+
+
+const XOR_KEY: u8 = 0xA3;
+const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00";
 
 pub mod write {
     use super::*;
 
-    fn write(filename: String, text: String) -> std::io::Result<()> {
+    pub fn write(filename: String, text: String) -> std::io::Result<()> {
         {
             let mut file = File::create(filename)?;
             // Write a slice of bytes to the file
 
-            let bytes = text.into_bytes();
+            //let bytes = text.into_bytes();
 
-            file.write_all(&bytes)?;
+            file.write_all(FILE_HEADER)?;
+
+
+            let encoded_bytes: Vec<u8> = text.as_bytes().iter().map(|byte| byte ^ XOR_KEY).collect();
+
+
+            file.write_all(&encoded_bytes)?;
         }
 
 
@@ -45,82 +60,32 @@ pub mod write {
 }
 
 pub mod read {
+    use std::io::{Error, ErrorKind};
+    use std::string::FromUtf8Error;
     use super::*;
 
-    fn read(filename: String) -> std::io::Result<()> {
+    pub fn read(filename: String) -> Result<String> {
         {
             let mut file = File::open(filename)?;
-            // read the same file back into a Vec of bytes
-            let mut buffer = Vec::<u8>::new();
-            file.read_to_end(&mut buffer)?;
-            println!("{:?}", buffer);
+
+            let mut header_buffer = vec![0u8; FILE_HEADER.len()];
+
+            file.read_exact(header_buffer.as_mut_slice())?;
+
+            if header_buffer != FILE_HEADER {
+                return Err(Error::new(ErrorKind::InvalidData, "Not a valid PRTGN Encoded file. Try Again."))
+            }
+
+            let mut encoded_buffer = Vec::new();
+            file.read_to_end(&mut encoded_buffer)?;
+
+
+            let decoded_byte: Vec<u8> = encoded_buffer.iter().map(|byte| byte ^ XOR_KEY).collect();
+
+            String::from_utf8(decoded_byte).map_err(|e: FromUtf8Error| Error::new(ErrorKind::InvalidData, e.to_string()))
+
         }
 
-        Ok(())
     }
 
 }
-
-
-
-// fn supported_unicode_char() {
-//     //let v = Vec::from_iter('\u{0000}'..='\u{10FFFF}');
-//     // println!("Unicode : {:?}", v);
-//     // println!("Unicode Char : {}", String::from_iter(v));
-//
-// //! **Supported Unicode Blocks : https://en.wikipedia.org/wiki/Unicode_block#List_of_blocks**
-//
-//     let basic_latin = Vec::from_iter('\u{0000}'..='\u{007F}');
-//
-//     let latin_one_supplement = Vec::from_iter('\u{0080}'..='\u{00FF}');
-//
-//     let latin_extended_a = Vec::from_iter('\u{0100}'..='\u{017F}');
-//
-//     let latin_extended_b = Vec::from_iter('\u{0180}'..='\u{024F}');
-//
-//     let ipa_extensions = Vec::from_iter('\u{0250}'..='\u{02AF}');
-//
-//     let spacing_modifier_letters = Vec::from_iter('\u{02B0}'..='\u{02FF}');
-//
-//     let combining_diacritical_marks = Vec::from_iter('\u{03000}'..='\u{036F}');
-//
-//     let general_punctuation = Vec::from_iter('\u{2000}'..='\u{206F}');
-//
-//     let super_sub_script = Vec::from_iter('\u{2070}'..='\u{209F}');
-//
-//     let currency_symbols = Vec::from_iter('\u{200A0}'..='\u{20CF}');
-//
-//     let letterlike_symbols = Vec::from_iter('\u{2100}'..='\u{214F}');
-//
-//     let maths_operators = Vec::from_iter('\u{2200}'..='\u{22FF}');
-//
-//     let box_draw = Vec::from_iter('\u{2500}'..='\u{257F}');
-//
-//
-// }
-
-
-// use std::fs;
-// use std::io::{BufWriter, Write};
-//
-// fn append_data_to_file(path: &str, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
-//     let file = fs::OpenOptions::new().create(true).append(true).open(&path)?;
-//     let mut file = BufWriter::new(file);
-//
-//     // You can either try to write all data at once
-//     file.write_all(&data)?;
-//
-//     // Or try to write as much as possible, but need
-//     // to take care of the remaining bytes yourself
-//     let remaining = file.write(&data)?;
-//     if remaining != 0 {
-//         // handle...
-//     }
-//
-//     // You definitely need to flush a BufWriter
-//     // as it cannot guarantee emptying its buffer
-//     // when it goes out of scope
-//     file.flush()?;
-//
-//     Ok(())
-// }
