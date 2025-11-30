@@ -24,7 +24,7 @@ A Rust library for encoding PRTGN files.
 
 ## Supported Unicode Blocks
 
-|                       Block                        |  Support (:white_check_mark: / :x:)  |
+|                       Block                        | Support ( :white_check_mark: / :x: ) |
 |:--------------------------------------------------:|:------------------------------------:|
 |                    Basic Latin                     |          :white_check_mark:          |
 |                 Latin-1 Supplement                 |          :white_check_mark:          |
