@@ -25,9 +25,16 @@ A Rust library for encoding PRTGN files.
 
 ### Implementing
 
-Add line to cargo.toml :
+Add one of the following lines to Cargo.toml
+
+Github :
 ```toml
 prtgn_encoding = { git = "https://github.com/PRTGN-Development-Team/PRTGN_encoding" }
+```
+
+Crates.io :
+```toml
+prtgn_encoding = "<newest version>"
 ```
 
 ### Write
