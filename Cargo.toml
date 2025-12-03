@@ -2,5 +2,12 @@
 name = "prtgn_encoding"
 version = "0.1.0"
 edition = "2024"
+license-file = "LICENSE"
+description = "Encoding and decoding for the PRTGN file format"
+homepage = "https://prtgn-development-team.github.io"
+repository = "https://github.com/PRTGN-Development-Team/PRTGN_encoding"
+readme = "README.md"
+keywords = ["PRTGN", "File-Format", "Encoding", "Decoding"]
 
 [dependencies]
+
