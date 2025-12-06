@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["PRTGN", "File-Format", "Encoding", "Decoding"]
 categories = ["command-line-interface", "encoding", "filesystem"]
 exclude = [".github", "target"]
-documentation = "docs.rs/prtgn_encoding"
+documentation = "https://docs.rs/prtgn_encoding"
 
 [dependencies]
 
