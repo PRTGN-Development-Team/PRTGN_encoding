@@ -1,13 +1,69 @@
+//! # Overview
+//!
+//! `PRTGN_encoding` (listed as `prtgn_encoding` for Cargo.TOML) is a library used by programs compatible with PRTGN files to encode and decode them.
+//!
+//! Any file can be encoded with PRTGN, though for user convenience it is highly recommended to use the .prtgn extension. What is being writen isn't a text file, simply add the original file extension to the end. Such as .prtgn_wav does.
+//!
+//! Going along with that, anything can be encoded with PRTGN. As long as what is given to the `write` function as a string.
+//!     An example of this is used by PRTGN for the wav file. [wav_converter.rs | PRTGN version 0.3.1, added in version 0.3.0](https://github.com/PRTGN-Development-Team/.prtgn/blob/83d6a200cdf14e82b84684480198a63ae40c63da/src/command/prtgn_wav/wav_converter.rs).
+//!     `wav_converter.rs` takes a wav file, reads its data, converts the data buffer to a string, and then writes it to a `prtgn_wav` file. The opposite is done for playing the wav file.
+//!
+//! Simply add PRTGN_encoding to your Cargo.TOML and add the following to your file to access commands depending on what you need!
+//!
+//! ## Read Only
+//! ```Rust
+//! use prtgn_encoding::read;
+//! ```
+//!
+//! ## Write Only
+//! ```Rust
+//! use prtgn_encoding::write;
+//! ```
+//!
+//! ## Read and Write
+//! ```Rust
+//! use prtgn_encoding::{read, write};
+//! ```
+//!
+//!
+//! ---
+//! ---
+//!
+//!
+//! # Example File Usage
+//!
+//!
+//! ## Basic Write Example
+//! ```commandline
+//! cargo run --example basic_write
+//! ```
+//!
+//! ## Basic Read Example
+//!
+//! **Run the write example first in order to have a correctly encoded PRTGN file with the right name**
+//!
+//! ```commandline
+//! cargo run --example basic_read
+//! ```
+//!
+//! ## Read Write Combo Example
+//! ```commandline
+//! cargo run --example read_write
+//! ```
+//!
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Result;
+use std::io::{Error, ErrorKind};
+use std::string::FromUtf8Error;
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn read_write_test() {
         println!("Hello from the PRTGN Development Team");
 
         let text = "Hello from PRTGN Encoding!".to_string();
@@ -27,17 +83,21 @@ mod tests {
     }
 }
 
-
-pub use read::read;
-pub use write::write;
-
-
 const XOR_KEY: u8 = 0xA3;
-const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00";
+const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00 ";
 
-pub mod write {
-    use super::*;
 
+    /// Writes to a file with PRTGN encoding.
+    ///
+    /// # Examples
+    ///
+    /// ```Rust
+    ///     let filename = "test.prtgn".to_string();
+    ///
+    ///     let text = "Hello world! This is some example text.".to_string();
+    ///
+    ///     write(filename, text).unwrap();
+    /// ```
     pub fn write(filename: String, text: String) -> std::io::Result<()> {
         {
             let mut file = File::create(filename)?;
@@ -57,13 +117,18 @@ pub mod write {
 
         Ok(())
     }
-}
 
-pub mod read {
-    use std::io::{Error, ErrorKind};
-    use std::string::FromUtf8Error;
-    use super::*;
-
+    /// Reads a PRTGN encoded file.
+    ///
+    /// # Examples
+    ///
+    /// ```Rust
+    ///     let filename = "test.prtgn".to_string();
+    ///
+    ///     let read_text = read(filename).unwrap().to_string();
+    ///
+    ///     println!("{}", read_text);
+    /// ```
     pub fn read(filename: String) -> Result<String> {
         {
             let mut file = File::open(filename)?;
@@ -88,4 +153,3 @@ pub mod read {
 
     }
 
-}
