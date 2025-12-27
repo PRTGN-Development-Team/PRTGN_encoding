@@ -51,11 +51,19 @@
 //! cargo run --example read_write
 //! ```
 //!
+//!
+//! # Development Note
+//!
+//! To test documentation, run the following.
+//! ```commandline
+//! cargo doc --open
+//! ```
 
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Result;
 use std::io::{Error, ErrorKind};
+use std::io::SeekFrom;
 use std::string::FromUtf8Error;
 
 #[cfg(test)]
@@ -84,7 +92,7 @@ mod tests {
 }
 
 const XOR_KEY: u8 = 0x66;
-const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team \x66 ";
+const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team | Version 0.2.0 | \x66 ";
 
 
     /// Writes to a file with PRTGN encoding.
@@ -126,27 +134,54 @@ const FILE_HEADER: &[u8] = b"Encoded with PRTGN | https://github.com/PRTGN-Devel
     ///
     ///     println!("{}", read_text);
     /// ```
+    ///
+    /// If the file is using an older encoding standard it is automatically updated to the newest version.
     pub fn read(filename: String) -> Result<String> {
-        {
-            let mut file = File::open(filename)?;
+        let mut file = File::open(filename.clone())?;
 
-            let mut header_buffer = vec![0u8; FILE_HEADER.len()];
+        let mut header_buffer = vec![0u8; FILE_HEADER.len()];
+        file.read_exact(&mut header_buffer)?;
 
-            file.read_exact(header_buffer.as_mut_slice())?;
+        let older_version = if header_buffer.starts_with(FILE_HEADER) {
+            "newest"
+        } else if header_buffer.starts_with(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team \x66 ") {
+            file.seek(SeekFrom::Start(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team \x66 ".len() as u64))?;
+            "0.1.3"
+        } else if header_buffer.starts_with(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00 ") {
+            file.seek(SeekFrom::Start(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00 ".len() as u64))?;
+            "0.1.2"
+        } else if header_buffer.starts_with(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00") {
+            file.seek(SeekFrom::Start(b"Encoded with PRTGN | https://github.com/PRTGN-Development-Team\x01\xFF\x00".len() as u64))?;
+            "0.1.1"
+        } else {
+            return Err(Error::new(ErrorKind::InvalidData, "Not a valid PRTGN encoded file."));
+        };
 
-            if header_buffer != FILE_HEADER {
-                return Err(Error::new(ErrorKind::InvalidData, "Not a valid file encoded with PRTGN. Try Again."))
-            }
+        if older_version != "newest" {
 
-            let mut encoded_buffer = Vec::new();
-            file.read_to_end(&mut encoded_buffer)?;
+            println!("The version of encoding is outdated. Automatically rewriting the file after read.");
+            println!("---------------------------------------------");
+            print!("");
+
+        };
+
+        let mut encoded_buffer = Vec::new();
+        file.read_to_end(&mut encoded_buffer)?;
 
 
-            let decoded_byte: Vec<u8> = encoded_buffer.iter().map(|byte| byte ^ XOR_KEY).collect();
+        let decoded_byte: Vec<u8> = if older_version == "newest" {
+            encoded_buffer.iter().map(|byte| byte ^ XOR_KEY).collect()
+        } else if older_version == "0.1.3" {
+            encoded_buffer.iter().map(|byte| byte ^ 0x66).collect()
+        } else if older_version == "0.1.2" {
+            encoded_buffer.iter().map(|byte| byte ^ 0xA3).collect()
+        } else if older_version == "0.1.1" {
+            encoded_buffer.iter().map(|byte| byte ^ 0xA3).collect()
+        } else {
+            unreachable!()
+        };
 
-            String::from_utf8(decoded_byte).map_err(|e: FromUtf8Error| Error::new(ErrorKind::InvalidData, e.to_string()))
+        write(filename, String::from_utf8(decoded_byte.clone()).unwrap())?;
 
-        }
-
+        String::from_utf8(decoded_byte).map_err(|e: FromUtf8Error| Error::new(ErrorKind::InvalidData, e.to_string()))
     }
-

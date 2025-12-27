@@ -1,6 +1,6 @@
 [package]
 name = "prtgn_encoding"
-version = "0.1.3"
+version = "0.2.0"
 edition = "2024"
 license = "GPL-3.0"
 description = "Encoding and decoding for the PRTGN file format"
@@ -9,7 +9,7 @@ repository = "https://github.com/PRTGN-Development-Team/PRTGN_encoding"
 readme = "README.md"
 keywords = ["PRTGN", "File-Format", "Encoding", "Decoding"]
 categories = ["command-line-interface", "encoding", "filesystem"]
-exclude = [".github", "target"]
+exclude = [".github", "target", ".idea"]
 documentation = "https://docs.rs/prtgn_encoding"
 
 [dependencies]
